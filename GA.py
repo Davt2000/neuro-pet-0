@@ -1,7 +1,7 @@
 from random import randint, sample, choice
-from math import ceil
+from math import ceil, fabs
 
-RADIATION = 10
+RADIATION = 20
 fun_list = [1, 2, 3, 5, 8, 13]
 signl = [-1, 1]
 
@@ -26,8 +26,14 @@ def mutate(dna):
 
     for i in range(n):
         j = randint(0, dna_len - 1)
-        sign = choice(signl)
-        mod = sign*chance*RADIATION/1000
+        sign, mod = 0, 0
+        while 1:
+            sign = choice(signl)
+            mod = sign*chance*RADIATION/1000
+            if fabs(dna[j] + mod) < 1:
+                break
+            else:
+                chance = randint(1, 100)
         dna[j] += mod
 
     return dna
@@ -40,10 +46,13 @@ def select(population):
     """
     population.sort(reverse=True, key=lambda item: item[1])
     population = population[:15]
+    f = open('score_log', mode='a')
     chance = sum(i[1] for i in population)
-
+    print('MAXSCORE in gen:', population[0][1], 'of', population[0][0])
+    f.write(str(population[0][1]) + '\n')
+    f.close()
     pairs = []
-    for i in range(25):
+    for i in range(20):
         parent_0, parent_1 = randint(0, chance), randint(0, chance)
         sum0, sum1 = 0, 0
 

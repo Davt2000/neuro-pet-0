@@ -17,6 +17,7 @@ class AUV:
         self.angle_abs = angle
         self.prograde = ((10,), (0,))
         self.f = 1
+
     def rot_mat(self):
         return ((cos(self.angle_abs), -sin(self.angle_abs)),
                 (sin(self.angle_abs), cos(self.angle_abs)))
@@ -43,14 +44,16 @@ class AUV:
         return p
 
     def update(self, inp1, inp2, inp3, dt):
-        self.rel_v = mult(self.rot_mat(), [[self.v[0][0]], [self.v[1][0]]])
+        try:
+            self.rel_v = mult(self.rot_mat(), [[self.v[0][0]], [self.v[1][0]]])
 
-        self.rel_a = [[ph.thrust_linear_force_x(inp1, inp2) / ph.M - ph.wat_res_force(self.rel_v[0][0]) / ph.M],  #
-                      [ph.thrust_linear_force_y(inp3) / ph.M - ph.wat_res_force(self.rel_v[1][0]) / ph.M]]
-        angle_thrust = ph.thrust_angle_acc(inp1, inp2, inp3)
-        self.ez = 0.1*angle_thrust - copysign(ph.wat_res_force(self.wz), angle_thrust)
-        self.a = mult(self.rot_mat(), self.rel_a)
-
+            self.rel_a = [[ph.thrust_linear_force_x(inp1, inp2) / ph.M - ph.wat_res_force(self.rel_v[0][0]) / ph.M],  #
+                          [ph.thrust_linear_force_y(inp3) / ph.M - ph.wat_res_force(self.rel_v[1][0]) / ph.M]]
+            angle_thrust = ph.thrust_angle_acc(inp1, inp2, inp3)
+            self.ez = 0.1 * angle_thrust - copysign(ph.wat_res_force(self.wz), angle_thrust)
+            self.a = mult(self.rot_mat(), self.rel_a)
+        except OverflowError or ZeroDivisionError or ValueError:
+            pass
         self.v[0][0] += self.a[0][0] * dt
         self.v[1][0] += self.a[1][0] * dt
         self.x_abs += self.v[0][0] * dt
@@ -65,15 +68,23 @@ class AUV:
         self.prograde = mult(self.rot_mat(), ((10,), (0,)))
 
     def seek(self, p3):
-        p1 = [self.x_abs, self.y_abs]
-        p2 = [self.x_abs + self.prograde[0][0], self.y_abs + self.prograde[1][0]]
-        P1 = ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
-        P2 = ((p3[0] - p2[0]) ** 2 + (p3[1] - p2[1]) ** 2) ** 0.5
-        P3 = ((p1[0] - p3[0]) ** 2 + (p1[1] - p3[1]) ** 2) ** 0.5
-        dest = acos(
-            (P2**2 - P1**2 - P3**2)/
-            (2*P1*P3)
-        )
+        try:
+            p1 = [self.x_abs, self.y_abs]
+            p2 = [self.x_abs + self.prograde[0][0], self.y_abs + self.prograde[1][0]]
+            P1 = ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
+            P2 = ((p3[0] - p2[0]) ** 2 + (p3[1] - p2[1]) ** 2) ** 0.5
+            P3 = ((p1[0] - p3[0]) ** 2 + (p1[1] - p3[1]) ** 2) ** 0.5
+            foo = (2 * P1 * P3)
+        except OverflowError or ZeroDivisionError or ValueError:
+            return 0
+
+        if not foo:
+            dest = 0
+        else:
+            try:
+                dest = acos((P2 ** 2 - P1 ** 2 - P3 ** 2) / foo)
+            except ValueError or ZeroDivisionError:
+                dest = 0
         p3 = mult(self.rot_mat(), [[-p3[0]], [-p3[1]]])
 
         dest = pi - dest
@@ -99,7 +110,7 @@ class AUV:
         print("Center position {:4d} x {:4d}".format(ceil(self.x_abs), ceil(self.y_abs)))
         print("Angle (rad) ", self.angle_abs)
         print("Hull pos ", *self.hull_pos())
-        print("Absolute speed ", (self.rel_v[0][0]**2 + self.rel_v[1][0]**2)**0.5)
+        print("Absolute speed ", (self.rel_v[0][0] ** 2 + self.rel_v[1][0] ** 2) ** 0.5)
         print("Rotation speed", self.wz)
         print("March and lag acceleration ", self.rel_a[0][0], self.rel_a[1][0])
         print("Angle acceleration", self.ez)

@@ -4,7 +4,7 @@ from sys import exit
 from model.auv import AUV
 from model.neuro import Net
 
-DEBUG = 1
+DEBUG = 0
 
 
 def generate_gate():
@@ -25,7 +25,7 @@ if DEBUG:
     pilot.save("", "pilot1")
 else:
     pilot = Net()
-    pilot.load("pilot1")
+    pilot.load("net2")
 
 gate_pos = generate_gate()
 
@@ -55,8 +55,6 @@ while 0 <= vehicle.x_abs <= 640:
     # thrust = insane_pilot()
     vehicle.update(thrust[0], thrust[1], thrust[2], dt)
     vehicle.render(screen)
-
-    dest = vehicle.seek(gate_pos)
 
     pygame.display.update()
     pygame.display.flip()

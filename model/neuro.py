@@ -8,8 +8,9 @@ class Net:
             [[0]*size_of_layers for j in range(size_of_layers)]
             for i in range(number_of_layers - 1)
         ]
-        self.number_of_layers=number_of_layers
-        self.size_of_layers=size_of_layers
+        self.number_of_layers = number_of_layers
+        self.size_of_layers = size_of_layers
+        self.name = 'name_me_plz'
 
     def randomize(self):
         for i in range(self.number_of_layers - 1):
@@ -17,16 +18,21 @@ class Net:
                 for k in range(self.size_of_layers):
                     self.layer_weights[i][j][k] = seed()
 
-    def save(self, path, name):
-        f = open(path + name, 'w')
+    def save(self, name=''):
+        if name == '':
+            name = self.name
+        f = open(name, 'w')
         f.writelines(["{} {}".format(self.number_of_layers, self.size_of_layers)])
         f.write("\n")
         for i in self.layer_weights:
             for j in i:
                 print(*j, file=f)
         f.close()
+        self.name = name
 
-    def load(self, path):
+    def load(self, path=''):
+        if path == '':
+            path = self.name
         f = open(path, 'r')
         self.number_of_layers, self.size_of_layers = map(int, f.readline().split())
         self.layer_weights = [
@@ -36,6 +42,7 @@ class Net:
             for i in range(self.number_of_layers - 1)
         ]
         f.close()
+        self.name = path
 
     def show(self):
         for i in self.layer_weights:
