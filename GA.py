@@ -1,9 +1,14 @@
 from random import randint, sample, choice
-from math import ceil, fabs
+from math import ceil, fabs, floor
 
 RADIATION = 20
 fun_list = [1, 2, 3, 5, 8, 13]
 signl = [-1, 1]
+PROCREATION_SIZE = 20
+
+
+def parent_distribution(x):
+    return 15 - floor(((x - 100)/-0.3915)**0.5)
 
 
 def crossover(dna1, dna2):
@@ -53,7 +58,8 @@ def select(population):
     f.close()
     pairs = []
     for i in range(20):
-        parent_0, parent_1 = randint(0, chance), randint(0, chance)
+        parent_0, parent_1 = parent_distribution(randint(0, 100)),\
+                             parent_distribution(randint(0, 100))
         sum0, sum1 = 0, 0
 
         for j in range(0, 14):
@@ -81,24 +87,3 @@ def procreate(dna1, dna2):
     dna1, dna2 = crossover(dna1, dna2)
     dna1, dna2 = mutate(dna1), mutate(dna2)
     return dna1, dna2
-
-#   connect to simulator
-
-#   generate population
-
-#   save its data
-
-#   create a room for simulation
-#   should be simulated in ticks, maximal time is 200% from ideal
-
-#   start simulation
-
-#   get scores for each instance
-
-#   cut 35
-
-#   count parent probability and generate 50 pairs // GAY PARENTING!!!
-
-#   create pizduks
-
-#   REPEAT!

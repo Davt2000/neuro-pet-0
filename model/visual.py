@@ -22,10 +22,10 @@ def insane_pilot():
 if DEBUG:
     pilot = Net(4, 3)
     pilot.randomize()
-    pilot.save("", "pilot1")
+    pilot.save("pilot1")
 else:
     pilot = Net()
-    pilot.load("net2")
+    pilot.load("net1")
 
 gate_pos = generate_gate()
 
@@ -48,8 +48,7 @@ while 0 <= vehicle.x_abs <= 640:
     screen.fill(0)
 
     pygame.draw.circle(screen, 0x00FF00, gate_pos, 5)
-    target = vehicle.seek(gate_pos)
-    thrust = pilot.run([[target],[target],[target]])
+    thrust = pilot.run([[vehicle.v[0]], [vehicle.v[1]], [vehicle.seek(gate_pos)]])
     thrust = thrust[0][0], thrust[1][0], thrust[2][0]
     print(*thrust)
     # thrust = insane_pilot()

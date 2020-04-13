@@ -3,6 +3,7 @@ from model.neuro import Net
 from random import randint
 from math import fabs, ceil
 
+
 WIDTH = 1600
 HEIGHT = 900
 TIME_LIMIT = 500
@@ -20,10 +21,9 @@ def get_distance(pos1, pos2):
     except OverflowError:
         return 9999999999999999
 
-
 def simulate(path):
     global WIDTH, HEIGHT, TIME_LIMIT
-    dt = 0.1
+    dt = 1
     epoch = 0
     minimal_distance = 9999999999999999
 
@@ -44,8 +44,7 @@ def simulate(path):
     while TERMINAL:
         epoch += 1
 
-        target = vehicle.seek(gate_pos)
-        thrust = pilot.run([[target], [target], [target]])
+        thrust = pilot.run([[vehicle.v[0]], [vehicle.v[1]], [vehicle.seek(gate_pos)]])
         thrust = thrust[0][0], thrust[1][0], thrust[2][0]
         vehicle.update(thrust[0], thrust[1], thrust[2], dt)
         veh_pos = vehicle.x_abs, vehicle.y_abs
@@ -63,9 +62,9 @@ def simulate(path):
             if epoch > 10:
                 break
 
-    distance_score = 4 - ceil(minimal_distance / (initial_distance + 1) * 4)
+    distance_score = 9 - ceil(minimal_distance / (initial_distance + 1) * 9)
 
-    total_score = GOT_TARGET * 5 + distance_score + GOT_MOVED * 2 - GOT_BORDER - TIMED_OUT * 3
+    total_score = GOT_TARGET * 10 + distance_score + GOT_MOVED * 3 - GOT_BORDER - TIMED_OUT * 3
 
     if DEBUG:
         if GOT_MOVED:
