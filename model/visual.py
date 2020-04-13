@@ -48,7 +48,7 @@ while 0 <= vehicle.x_abs <= 640:
     screen.fill(0)
 
     pygame.draw.circle(screen, 0x00FF00, gate_pos, 5)
-    thrust = pilot.run([[vehicle.v[0]], [vehicle.v[1]], [vehicle.seek(gate_pos)]])
+    thrust = pilot.run([[vehicle.seek(gate_pos)], [vehicle.seek(gate_pos)], [vehicle.seek(gate_pos)]])
     thrust = thrust[0][0], thrust[1][0], thrust[2][0]
     print(*thrust)
     # thrust = insane_pilot()

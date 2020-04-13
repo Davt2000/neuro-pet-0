@@ -44,7 +44,7 @@ def simulate(path):
     while TERMINAL:
         epoch += 1
 
-        thrust = pilot.run([[vehicle.v[0]], [vehicle.v[1]], [vehicle.seek(gate_pos)]])
+        thrust = pilot.run([[vehicle.seek(gate_pos)], [vehicle.seek(gate_pos)], [vehicle.seek(gate_pos)]])
         thrust = thrust[0][0], thrust[1][0], thrust[2][0]
         vehicle.update(thrust[0], thrust[1], thrust[2], dt)
         veh_pos = vehicle.x_abs, vehicle.y_abs
