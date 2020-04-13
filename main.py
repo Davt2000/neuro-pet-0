@@ -2,8 +2,10 @@ from model.neuro import Net
 from simulator import simulate
 import multiprocessing
 from GA import *
+from time import time
+from sys import _clear_type_cache
 
-net = Net(3, 4)
+net = Net(5, 3)
 population = []
 for i in range(50):
     # creating a population
@@ -11,17 +13,23 @@ for i in range(50):
     net.randomize()
     net.save("nets/net{}".format(i))
     population.append('nets/net{}'.format(i))
-
+f = open('score_log', 'w')
+f.write('')
+f.close()
+f_time = open('time_log', 'w')
+f_time.write('')
 
 dna_s = []
-for i in range(500):
+
+for i in range(1000):
     population_scores_alt = dict.fromkeys(population, 0)
+    now = time()
     # start simulation and get scores
-    for k in range(10):
+    for k in range(100):
         try:
-            with multiprocessing.Pool(processes=50) as pool:         # start 4 worker processes
-                result = pool.map_async(simulate, population)  # evaluate "f(10)" asynchronously in a single process
-                population_with_score = result.get(timeout=5)        # prints "100" unless your computer is *very* slow
+            with multiprocessing.Pool(processes=20) as pool:         # start 4 worker processes
+                population_with_score = pool.map(simulate, population)
+                #  population_with_score = result.get(timeout=1)
         except multiprocessing.context.TimeoutError:
             print('forced skip', i)
             continue
@@ -40,7 +48,6 @@ for i in range(500):
         net.load(pair[1])
         dna2 = net.extract_dna()
 
-
         dna1, dna2 = procreate(dna1, dna2)
         dna_s.append(dna1)
         dna_s.append(dna2)
@@ -55,9 +62,16 @@ for i in range(500):
         # save its data
         net.randomize()
         net.save("nets/net{}".format(j))
+        dna_s.append(net.extract_dna())
         population.append('nets/net{}'.format(j))
 
+    f = open('log', 'w')
+    f.writelines([str(k) + '\n' for k in dna_s])
+    f.close()
+    _clear_type_cache()
+    cycle = int(time() - now)
+    f_time.write(str(cycle) + '\n')
+    print("simulation of gen took", time() - now, "sec")
     print("generation ", i, "simulated")
-f = open('log', 'w')
 
-f.writelines([str(i) + '\n' for i in dna_s])
+f_time.close()
