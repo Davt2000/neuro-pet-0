@@ -18,7 +18,7 @@ f.write('')
 f.close()
 f_time = open('time_log', 'w')
 f_time.write('')
-
+f_time.close()
 dna_s = []
 
 for i in range(1000):
@@ -68,10 +68,14 @@ for i in range(1000):
     f = open('log', 'w')
     f.writelines([str(k) + '\n' for k in dna_s])
     f.close()
+
     _clear_type_cache()
     cycle = int(time() - now)
+
+    f_time = open('time_log', 'a')
     f_time.write(str(cycle) + '\n')
+    f_time.close()
+
     print("simulation of gen took", time() - now, "sec")
     print("generation ", i, "simulated")
 
-f_time.close()
