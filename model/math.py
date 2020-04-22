@@ -20,8 +20,9 @@ def mult(X, Y):
 
     return result
 
+
 def seed():
-    return float(randint(-1000, 1000))/1000
+    return float(randint(-1500, 1500))/1000
 
 
 def sigm(x):
@@ -41,17 +42,21 @@ def myfunc(x):
         return 0
     else:
         return (tanh(x-0.2) + 1)/2
+
+
 def eq(x):
     return x
 
 
 @matrix_upgrade
 def filter(x):
-    if -0.1 < x < 0.1:
-        return 0
+    if -0.1 < x < 0:
+        return x - 0.1
+    elif 0 < x < 0.1:
+        return x + 0.1
     elif x > 1:
         return 1
-    elif x < -0.4:
-        return -0.4
+    elif x < -1:
+        return -1
     else:
         return x

@@ -5,6 +5,8 @@ from model.auv import AUV
 from model.neuro import Net
 
 DEBUG = 0
+MAX_SPEED = 157
+MAX_SPIN = 20
 
 
 def generate_gate():
@@ -25,7 +27,7 @@ if DEBUG:
     pilot.save("pilot1")
 else:
     pilot = Net()
-    pilot.load("net1")
+    pilot.load("net2")
 
 gate_pos = generate_gate()
 
@@ -41,17 +43,22 @@ vehicle = AUV(300, 300, 0)
 vehicle.render(screen)
 
 thrust = (0.3, 0.4, 0.00)
+e = pygame.event.get()
 
 
-while 0 <= vehicle.x_abs <= 640:
+while e[0] != pygame.WINDOWEVENT_CLOSE:
     epoch += 1
     screen.fill(0)
 
     pygame.draw.circle(screen, 0x00FF00, gate_pos, 5)
-    thrust = pilot.run([[vehicle.seek(gate_pos)], [vehicle.seek(gate_pos)], [vehicle.seek(gate_pos)]])
+    # thrust = pilot.run([[vehicle.seek(gate_pos)], [vehicle.seek(gate_pos)], [vehicle.seek(gate_pos)]])
+    # thrust = pilot.run([[vehicle.rel_v[0][0]/MAX_SPEED], [vehicle.rel_v[1][0]/MAX_SPEED], [vehicle.seek(gate_pos)]])
+    thrust = pilot.run([[vehicle.rel_v[0][0]/MAX_SPEED], [vehicle.rel_v[1][0]/MAX_SPEED],
+                        [vehicle.wz/MAX_SPIN], [vehicle.seek(gate_pos)]])
+
     thrust = thrust[0][0], thrust[1][0], thrust[2][0]
+
     print(*thrust)
-    # thrust = insane_pilot()
     vehicle.update(thrust[0], thrust[1], thrust[2], dt)
     vehicle.render(screen)
 
@@ -60,6 +67,15 @@ while 0 <= vehicle.x_abs <= 640:
 
     frames = pygame.time.Clock()
     frames.tick(FRAMERATE)
+
+    if vehicle.x_abs < 0:
+        vehicle.x_abs = 640
+    elif vehicle.x_abs > 640:
+        vehicle.x_abs = 0
+    if vehicle.y_abs < 0:
+        vehicle.y_abs = 480
+    elif vehicle.y_abs > 480:
+        vehicle.y_abs = 0
 
 print("TOTAL TIME ", epoch)
 exit(0)

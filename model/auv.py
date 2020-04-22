@@ -17,6 +17,7 @@ class AUV:
         self.angle_abs = angle
         self.prograde = ((10,), (0,))
         self.f = 1
+        self.spins = 0
 
     def rot_mat(self):
         return ((cos(self.angle_abs), -sin(self.angle_abs)),
@@ -60,10 +61,11 @@ class AUV:
         self.y_abs += self.v[1][0] * dt
 
         self.wz += self.ez * dt / ph.J
+        self.angle_abs += self.wz * dt
         if 2 * pi <= self.angle_abs <= 2 * pi:
             self.angle_abs /= 2 * pi
             print("360 FLIP!!!")
-        self.angle_abs += self.wz * dt
+            self.spins += 1
 
         self.prograde = mult(self.rot_mat(), ((10,), (0,)))
 

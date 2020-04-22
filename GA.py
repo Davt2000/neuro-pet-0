@@ -1,5 +1,6 @@
 from random import randint, sample, choice
 from math import ceil, fabs, floor
+from model.math import seed
 
 RADIATION = 20
 fun_list = [1, 2, 3, 5, 8, 13]
@@ -35,12 +36,17 @@ def mutate(dna):
         while 1:
             sign = choice(signl)
             mod = sign*chance*RADIATION/1000
-            if fabs(dna[j] + mod) < 1:
+            if fabs(dna[j] + mod) < 1.5:
                 break
             else:
                 chance = randint(1, 100)
         dna[j] += mod
 
+    chance = randint(1, 100)
+    if chance > RADIATION:
+        return dna
+
+    dna[randint(0, dna_len - 1)] = seed()
     return dna
 
 
@@ -49,7 +55,7 @@ def select(population):
     :type population: list
     [[creature_id, score],]
     """
-    population.sort(reverse=True, key=lambda item: item[1])
+    # should be sorted outside
     population = population[:15]
     f = open('score_log', mode='a')
     chance = sum(i[1] for i in population)

@@ -43,6 +43,7 @@ class Net:
         ]
         f.close()
         self.name = path
+        return self.extract_dna()
 
     def show(self):
         for i in self.layer_weights:

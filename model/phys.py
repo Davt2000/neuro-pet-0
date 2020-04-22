@@ -4,7 +4,7 @@ n = 1004*10**(-6)  # water viscosity
 a1 = 0.3  # size parameter for thruster placement
 a2 = 0.6  # size parameter for thruster placement
 a3 = 0.7  # size parameter for water resistance
-
+maxspeed = 157  # maximal auv speed at maximal thrust and current physics
 
 class Phys:
     M = 15
