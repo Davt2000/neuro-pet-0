@@ -2,8 +2,8 @@ from random import randint, sample, choice
 from math import ceil, fabs, floor
 from model.math import seed
 
-RADIATION = 20
-fun_list = [1, 2, 3, 5, 8, 13]
+RADIATION = 15
+fun_list = [1, 1, 2, 3, 5, 8, 13, 21, 34]
 signl = [-1, 1]
 PROCREATION_SIZE = 20
 
@@ -27,12 +27,13 @@ def mutate(dna):
     if chance > RADIATION:
         return dna
 
-    n = choice(fun_list)
     dna_len = len(dna)
+    n = choice(fun_list)
+    while n > dna_len:
+        n = choice(fun_list)
 
     for i in range(n):
         j = randint(0, dna_len - 1)
-        sign, mod = 0, 0
         while 1:
             sign = choice(signl)
             mod = sign*chance*RADIATION/1000

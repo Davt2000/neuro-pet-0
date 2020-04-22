@@ -3,7 +3,6 @@ from simulator import simulate
 import multiprocessing
 from GA import *
 from time import time
-from sys import _clear_type_cache
 
 net = Net(7, 4)
 population = []
@@ -21,9 +20,6 @@ f.close()
 f_time = open('time_log', 'w')
 f_time.write('')
 f_time.close()
-f_log = open('generation_log', 'w')
-f.write('')
-f.close()
 
 dna_s = []
 
@@ -44,13 +40,13 @@ for i in range(1000):
 
     population_with_score = list(population_scores_alt.items())
     f_log = open('generation_log', 'w')
-    f.writelines([str(foo) for foo in population_with_score])
-    f.close()
+    f_log.writelines([str(foo) + '\n' for foo in population_with_score])
+    f_log.close()
 
     # select best
     population_with_score.sort(reverse=True, key=lambda item: item[1])
     parents = select(population_with_score)
-    survivors = [net.load(foo[0]) for foo in population_with_score[:5]]
+    # survivors = [net.load(foo[0]) for foo in population_with_score[:5]]
 
     # create pizduks
     dna_s = []
@@ -62,17 +58,17 @@ for i in range(1000):
         dna_s.append(dna1)
         dna_s.append(dna2)
 
-    for survivor, individual in zip(survivors, population[:5]):
-        net.load(individual)
-        net.insert_dna(survivor)
-        net.save()
+    # for survivor, individual in zip(survivors, population[:5]):
+    #     net.load(individual)
+    #     net.insert_dna(survivor)
+    #     net.save()
 
-    for dna, individual in zip(dna_s, population[5:]):
+    for dna, individual in zip(dna_s, population):
         net.load(individual)
         net.insert_dna(dna)
         net.save()
 
-    for j in range(45, 50):
+    for j in range(40, 50):
         # creating a population
         # save its data
         net.randomize()
@@ -84,7 +80,6 @@ for i in range(1000):
     f.writelines([str(k) + '\n' for k in dna_s])
     f.close()
 
-    _clear_type_cache()
     cycle = int(time() - now)
 
     f_time = open('time_log', 'a')
@@ -93,4 +88,3 @@ for i in range(1000):
 
     print("simulation of gen took", time() - now, "sec")
     print("generation ", i, "simulated")
-

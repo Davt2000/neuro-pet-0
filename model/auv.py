@@ -117,3 +117,7 @@ class AUV:
         print("March and lag acceleration ", self.rel_a[0][0], self.rel_a[1][0])
         print("Angle acceleration", self.ez)
         print()
+
+    def get_abs_v(self):
+        return (self.v[0][0] ** 2 + self.v[1][0] ** 2) ** 0.5
+

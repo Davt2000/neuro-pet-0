@@ -7,7 +7,7 @@ WIDTH = 1600
 HEIGHT = 900
 TIME_LIMIT = 500
 DEBUG = 0
-MAX_SPEED = 157
+MAX_SPEED = 150
 MAX_SPIN = 20
 
 
@@ -65,7 +65,7 @@ def simulate(path):
         TIMED_OUT = epoch > TIME_LIMIT
         GOT_DESTROYED = fabs(vehicle.wz) > MAX_SPIN / 1.4 or \
             fabs(thrust[0]) > 1 or fabs(thrust[1]) > 1 or fabs(thrust[2]) > 1 or \
-            vehicle.spins > 20
+            vehicle.spins > 20 or fabs(vehicle.get_abs_v()) > MAX_SPEED
         TERMINAL = not (GOT_TARGET or GOT_BORDER or TIMED_OUT or GOT_DESTROYED)
 
         distance = get_distance(veh_pos, gate_pos)
