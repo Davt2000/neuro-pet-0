@@ -49,12 +49,8 @@ def eq(x):
 
 
 @matrix_upgrade
-def filter(x):
-    if -0.1 < x < 0:
-        return x - 0.1
-    elif 0 < x < 0.1:
-        return x + 0.1
-    elif x > 1:
+def filt(x):
+    if x > 1:
         return 1
     elif x < -1:
         return -1

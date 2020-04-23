@@ -2,7 +2,7 @@ from .math import *
 
 
 class Net:
-    def __init__(self, number_of_layers=2, size_of_layers=2, func=filter):
+    def __init__(self, number_of_layers=2, size_of_layers=2, func=filt):
         self.activation = func
         self.layer_weights = [
             [[0]*size_of_layers for j in range(size_of_layers)]
