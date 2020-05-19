@@ -4,6 +4,7 @@ n = 1004*10**(-6)  # water viscosity
 a1 = 0.3  # size parameter for thruster placement
 a2 = 0.6  # size parameter for thruster placement
 a3 = 0.7  # size parameter for water resistance
+a4 = 1.6  # size parameter for water resistance
 maxspeed = 157  # maximal auv speed at maximal thrust and current physics
 
 class Phys:
@@ -14,9 +15,8 @@ class Phys:
     def wat_res_force(v):
         s = a3**2 # front size
         d = s/a3  # hydraulic diameter
-        out = ro**2*v**3*d*s/(2*n)
-        # return out
-        return 0.005*(0.1*v)**2*s/2/n
+        # out = ro**2*v**3*d*s/(2*n)
+        return (v**2*s/2)/2
 
     @staticmethod
     def thrust_linear_force_x(inp1, inp2):

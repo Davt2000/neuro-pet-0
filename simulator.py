@@ -3,28 +3,19 @@ from model.neuro import Net
 from random import randint
 from math import fabs, ceil
 
-WIDTH = 1600
-HEIGHT = 900
-TIME_LIMIT = 500
-DEBUG = 0
-MAX_SPEED = 150
-MAX_SPIN = 20
 
-
-def generate_pos():
-    pos = randint(100, WIDTH - 100), randint(100, HEIGHT - 100)
+def generate_pos(w, h):
+    pos = randint(100, w - 100), randint(100, h - 100)
     return pos
 
 
 def simulate_thrusters(x):
-    if -1 < x < -0.4:
+    if x < -0.4:
         return -0.4
     elif -0.2 < x < 0.2:
         return 0
     elif x > 1:
         return 1
-    elif x < -1:
-        return -1
     else:
         return x
 
@@ -36,8 +27,10 @@ def get_distance(pos1, pos2):
         return 9999999999999999
 
 
-def simulate(path, pos):
-    global WIDTH, HEIGHT, TIME_LIMIT, MAX_SPEED, MAX_SPIN
+def simulate(path, pos=(150, 150), training_mode='free', path_to_ex=''):
+    TIME_LIMIT = 500
+    MAX_SPEED = 120
+    MAX_SPIN = 20
     dt = 1
     epoch = 0
     minimal_distance = 9999999999999999
@@ -53,9 +46,39 @@ def simulate(path, pos):
 
     pilot = Net()
     pilot.load(path)
-    gate_pos = pos
-    veh_pos = WIDTH/2, HEIGHT/2
-    vehicle = AUV(veh_pos[0], veh_pos[1], -1.55)
+
+    if training_mode == 'competitive':
+        WIDTH = 1500
+        HEIGHT = 1500
+
+        gate_pos = pos
+        veh_pos = WIDTH/2, HEIGHT/2
+        vehicle = AUV(veh_pos[0], veh_pos[1], -1.55)
+
+    elif training_mode == 'free':
+        WIDTH = randint(210, 3000)
+        HEIGHT = randint(210, 3000)
+
+        gate_pos = generate_pos(WIDTH, HEIGHT)
+        veh_pos = generate_pos(WIDTH, HEIGHT)
+        vehicle = AUV(veh_pos[0], veh_pos[1], randint(-150, 150) / 100)
+
+    elif training_mode == 'exercise':
+        f = open(path_to_ex, 'r')
+        exercise = [list(map(int, f.readline().split())),
+                    list(map(float, f.readline().split())),
+                    list(map(float, f.readline().split())),
+                    list(map(int, f.readline().split()))
+                    ]
+        f.close()
+
+        WIDTH, HEIGHT = exercise[0][0], exercise[0][1]
+        gate_pos = exercise[3][0], exercise[3][1]
+        veh_pos = exercise[1][0], exercise[1][1]
+        vehicle = AUV(veh_pos[0], veh_pos[1], exercise[1][2])
+        vehicle.v[0][0], vehicle.v[1][0] = exercise[2][0], exercise[2][1]
+    else:
+        raise AssertionError("Invalid training mode '{}' in simulator".format(training_mode))
 
     initial_distance = get_distance(veh_pos, gate_pos)
 
@@ -71,7 +94,8 @@ def simulate(path, pos):
 
         thrust = simulate_thrusters(thrust[0][0]), simulate_thrusters(thrust[1][0]), simulate_thrusters(thrust[2][0])
 
-        vehicle.update(thrust[0], thrust[1], thrust[2], dt)
+        vehicle.update_new(thrust[0], thrust[1], thrust[2])
+        vehicle.move(dt)
         veh_pos = vehicle.x_abs, vehicle.y_abs
 
         GOT_TARGET = fabs(vehicle.x_abs - gate_pos[0]) <= 4 and fabs(vehicle.y_abs - gate_pos[1]) <= 4
@@ -96,18 +120,5 @@ def simulate(path, pos):
 
     total_score = GOT_TARGET * 12 + distance_score + GOT_MOVED * 4 - \
         GOT_BORDER * 3 - TIMED_OUT * 2 - GOT_DESTROYED * 4 - SPINNED_TO_DEATH*7 + TIME_SCORE
-
-    if DEBUG:
-        if GOT_MOVED:
-            print("moved: 2 pts")
-        print("started at", initial_distance, "distance, minimal is",
-              minimal_distance, "; score is", distance_score, 'pts')
-        if GOT_TARGET:
-            print("got target: 5 pts")
-        if GOT_BORDER:
-            print("hit the border: -1 point")
-        if TIMED_OUT:
-            print("out of time: -3 points")
-        print()
 
     return path, total_score

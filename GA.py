@@ -1,15 +1,16 @@
 from random import randint, sample, choice
-from math import ceil, fabs, floor, trunc
+from math import ceil, fabs, trunc
 from model.math import seed
 
-RADIATION = 20
-fun_list = [1, 1, 2, 3, 5, 8, 13, 21, 34]
+RADIATION = 50
+fun_list = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
 signl = [-1, 1]
-PROCREATION_SIZE = 20
+NUMBER_OF_CHILDREN = 40
+MAX_PARENTS = 20
 
 
 def parent_distribution(x):
-    return 15 - floor(((x - 100)/-0.3915)**0.5)
+    return MAX_PARENTS - ceil((-x + 100)**0.5/10*MAX_PARENTS)
 
 
 def crossover(dna1, dna2):
@@ -58,34 +59,27 @@ def select(population):
     [[creature_id, score],]
     """
     # should be sorted outside
-    population = population[:15]
-    f = open('score_log', mode='a')
-    chance = sum(i[1] for i in population)
-    print('MAXSCORE in gen:', population[0][1], 'of', population[0][0])
-    f.write(str(population[0][1]) + '\n')
-    f.close()
+    population = population[:MAX_PARENTS]
+
     pairs = []
-    for i in range(20):
+    for i in range(NUMBER_OF_CHILDREN):
         parent_0, parent_1 = parent_distribution(randint(0, 100)),\
                              parent_distribution(randint(0, 100))
-        sum0, sum1 = 0, 0
+        if parent_0 > parent_1:
+            parent_1, parent_0 = parent_0, parent_1
 
-        for j in range(0, 14):
-            if parent_0 >= sum0:
-                parent_0 = population[j][0]  # yay, gender equality!
-                break
+        if parent_1 == parent_0:
+            if parent_0 != 0:
+                parent_0 -= 1
             else:
-                sum0 += population[j][1]
+                parent_1 += 1
 
-        for j in range(1, 15):
-            if parent_1 >= sum0:
-                parent_1 = population[j][0]
-                if parent_0 == parent_1:
-                    parent_1 = population[j-1][0]  # fuck parthenogenesis!
-                break
-            else:
-                sum0 += population[j][1]
+        if parent_1 >= MAX_PARENTS - 1:
+            if parent_1 == parent_0:
+                parent_0 -= 2
+            parent_1 -= 1
 
+        parent_0, parent_1 = population[parent_0][0], population[parent_1][0]
         pairs.append((parent_0, parent_1))
 
     return pairs

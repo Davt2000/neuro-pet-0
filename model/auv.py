@@ -1,8 +1,7 @@
 from model.phys import Phys as ph
 from model.math import mult
-from math import sin, cos, ceil, copysign, pi, acos
+from math import sin, cos, ceil, copysign, pi, acos, fabs
 from pygame.draw import polygon, circle
-
 
 class AUV:
     def __init__(self, x, y, angle):
@@ -18,6 +17,9 @@ class AUV:
         self.prograde = ((10,), (0,))
         self.f = 1
         self.spins = 0
+        self.sign = [+1, +1]
+        self.log_sign = 1, 1
+        self.water_res_force = 0, 0
 
     def rot_mat(self):
         return ((cos(self.angle_abs), -sin(self.angle_abs)),
@@ -44,17 +46,48 @@ class AUV:
                 p[i][j][0] = ceil(p[i][j][0] + p_alt[i][j][0])
         return p
 
-    def update(self, inp1, inp2, inp3, dt):
-        try:
-            self.rel_v = mult(self.rot_mat(), [[self.v[0][0]], [self.v[1][0]]])
+    def calculate_thrust(self, inp1, inp2, inp3):
+        self.rel_v = mult(self.rot_mat(), [[self.v[0][0]], [self.v[1][0]]])
+        self.rel_a = [[ph.thrust_linear_force_x(inp1, inp2) / ph.M],
+                      [ph.thrust_linear_force_y(inp3) / ph.M]]
+        self.log_sign = self.sign
 
-            self.rel_a = [[ph.thrust_linear_force_x(inp1, inp2) / ph.M - ph.wat_res_force(self.rel_v[0][0]) / ph.M],  #
-                          [ph.thrust_linear_force_y(inp3) / ph.M - ph.wat_res_force(self.rel_v[1][0]) / ph.M]]
+    def update(self, inp1, inp2, inp3):
+        try:
+            self.calculate_thrust(inp1, inp2, inp3)
             angle_thrust = ph.thrust_angle_acc(inp1, inp2, inp3)
-            self.ez = 0.1 * angle_thrust - copysign(ph.wat_res_force(self.wz), angle_thrust)
+            try:
+                self.sign = self.wz / fabs(self.wz)
+
+            except ZeroDivisionError:
+                self.sign = 1
+            self.ez = 0.1 * angle_thrust - self.sign * ph.wat_res_force(self.wz)
             self.a = mult(self.rot_mat(), self.rel_a)
+
         except OverflowError or ZeroDivisionError or ValueError:
             pass
+        pass
+
+    def update_new(self, inp1, inp2, inp3):
+        self.calculate_thrust(inp1, inp2, inp3)
+        angle_thrust = ph.thrust_angle_acc(inp1, inp2, inp3)
+        self.water_res_force = -ph.wat_res_force(-(self.rel_v[0][0])) / ph.M, -ph.wat_res_force(-self.rel_v[1][0]) / ph.M
+        if self.rel_v[0][0] >= 0:
+            self.rel_a[0][0] += self.water_res_force[0]
+        else:
+            self.rel_a[0][0] -= self.water_res_force[0]
+        if self.rel_v[1][0] >= 0:
+            self.rel_a[1][0] += self.water_res_force[1]
+        else:
+            self.rel_a[1][0] -= self.water_res_force[1]
+        if self.wz < 0:
+            self.ez = angle_thrust + 2.5*ph.wat_res_force(-self.wz)
+        else:
+            self.ez = angle_thrust - 2.5*ph.wat_res_force(-self.wz)
+
+        self.a = mult(self.rot_mat(), self.rel_a)
+
+    def move(self, dt):
         self.v[0][0] += self.a[0][0] * dt
         self.v[1][0] += self.a[1][0] * dt
         self.x_abs += self.v[0][0] * dt
@@ -120,4 +153,3 @@ class AUV:
 
     def get_abs_v(self):
         return (self.v[0][0] ** 2 + self.v[1][0] ** 2) ** 0.5
-
