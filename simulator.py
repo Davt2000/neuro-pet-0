@@ -118,7 +118,6 @@ def simulate(path, pos=(150, 150), training_mode='free', path_to_ex=''):
 
     distance_score = 9 - ceil(minimal_distance / (initial_distance + 1) * 9)
 
-    total_score = GOT_TARGET * 12 + distance_score + GOT_MOVED * 4 - \
-        GOT_BORDER * 3 - TIMED_OUT * 2 - GOT_DESTROYED * 4 - SPINNED_TO_DEATH*7 + TIME_SCORE
+    total_score = GOT_TARGET * 12 + distance_score + GOT_MOVED * 4 + TIME_SCORE
 
     return path, total_score

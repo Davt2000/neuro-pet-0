@@ -3,7 +3,9 @@ from simulator import simulate
 from GA import *
 from time import time, sleep
 from runpy import run_path
+
 TRAINING_STRATEGY = 1
+
 
 def generate_pos():
     pos = randint(100, 1600 - 100), randint(100, 600 - 100)
@@ -48,7 +50,7 @@ for i in range(10000):
                 for individual in population:
                     score = simulate(individual, training_mode='exercise',
                                      path_to_ex='teacher/ex{}'.format(k))
-                    population_scores_alt[individual] += score[1]*2
+                    population_scores_alt[individual] += score[1] * 2
         elif i < 1500:
             for k in range(20):
                 for individual in population:
@@ -108,8 +110,6 @@ for i in range(10000):
                     score = simulate(individual, training_mode='free')
                     population_scores_alt[individual] += score[1]
 
-
-
     population_with_score = list(population_scores_alt.items())
 
     # select best
@@ -162,10 +162,10 @@ for i in range(10000):
     f_time.write(str(cycle) + '\n')
     f_time.close()
 
-    print("Simulation of gen",  i, "took", time() - now, "sec")
+    print("Simulation of gen", i, "took", time() - now, "sec; Results:", population_with_score[0][1], 'points')
 
     if i % 50 == 0 and i > 0:
         print("Preventing throttling...")
-        sleep(10*int(time() - now))
+        sleep(10 * int(time() - now))
     if i % 5 == 0:
         run_path('/home/perturabo/PycharmProjects/neuro_0/plot.py')
