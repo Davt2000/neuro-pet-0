@@ -127,7 +127,7 @@ for i in range(10000):
     f.write(str(population_with_score[0][1]) + '\n')
     f.close()
 
-    # create pizduks
+    # create kids
     dna_s = []
     for pair in parents:
         dna1 = net.load(pair[0])
